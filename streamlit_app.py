@@ -1,3 +1,4 @@
+from huggingface_hub import hf_hub_download
 from pathlib import Path
 import sys
 
@@ -9,7 +10,10 @@ from timm.data.transforms_factory import create_transform
 
 APP_TITLE = "Dashboard Klasifikasi Daun Kopi Robusta"
 APP_SUBTITLE = "Upload gambar daun kopi robusta untuk diprediksi menggunakan model DenseNet yang sudah dilatih sebelumnya."
-MODEL_PATH = Path("densenet_kopi_best.pth")
+MODEL_PATH = hf_hub_download(
+    repo_id="anggiii/densenet-kopi",
+    filename="densenet_kopi_best.pth"
+)
 MAX_TOP_K = 5
 
 
