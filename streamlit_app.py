@@ -216,12 +216,8 @@ st.markdown(
 
 st.write("")
 
-if not MODEL_PATH.exists():
-    st.error(f"File model tidak ditemukan: {MODEL_PATH}")
-    st.stop()
-
 try:
-    resources = load_model_and_transform(str(MODEL_PATH))
+    resources = load_model_and_transform(MODEL_PATH)
 except Exception as error:
     st.error(f"Gagal memuat model: {error}")
     st.stop()
