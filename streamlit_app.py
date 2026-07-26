@@ -6,8 +6,9 @@ import os
 import streamlit as st
 import torch
 from PIL import Image
-import timm
-from timm.data.transforms_factory import create_transform
+import torch.nn as nn
+from torchvision import transforms as T
+from torchvision.models import densenet121
 
 APP_TITLE = "Dashboard Klasifikasi Daun Kopi Robusta"
 APP_SUBTITLE = "Upload gambar daun kopi robusta untuk diprediksi menggunakan model DenseNet yang sudah dilatih sebelumnya."
@@ -159,17 +160,27 @@ st.markdown(
 @st.cache_resource(show_spinner=False)
 def load_model_and_transform(model_path: str):
     checkpoint = torch.load(model_path, map_location="cpu")
-    model_name = checkpoint["model_name"]
+
     class_names = checkpoint["class_names"]
-    data_config = checkpoint["data_config"]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = timm.create_model(model_name, pretrained=False, num_classes=len(class_names))
+
+    model = densenet121(weights=None)
+    model.classifier = nn.Linear(model.classifier.in_features, len(class_names))
     model.load_state_dict(checkpoint["model_state_dict"])
     model = model.to(device)
     model.eval()
 
-    transform = create_transform(**data_config, is_training=False)
+    transform = T.Compose([
+        T.Resize(256),
+        T.CenterCrop(224),
+        T.ToTensor(),
+        T.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
+    ])
+
     return {
         "checkpoint": checkpoint,
         "model": model,
@@ -237,7 +248,7 @@ with st.sidebar:
     confidence_threshold = st.slider("Ambang keyakinan", min_value=0.0, max_value=1.0, value=0.5, step=0.01)
 
     st.markdown("### Informasi model")
-    st.caption(f"Model: {checkpoint.get('model_name', 'unknown')}")
+    st.caption(f"Model: {'DenseNet121 (torchvision)'}")
     st.caption(f"Device: {device}")
     st.caption(f"Jumlah kelas: {len(class_names)}")
     st.caption("Kelas yang dikenali:")
