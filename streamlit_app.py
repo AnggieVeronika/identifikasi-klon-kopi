@@ -17,7 +17,6 @@ MODEL_PATH = Path(
         filename="densenet_kopi_best.pth"
     )
 )
-)
 MAX_TOP_K = 5
 
 
